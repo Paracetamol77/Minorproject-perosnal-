@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance List</title>
+</head>
+<body>
+    <h1>Attendance List</h1>
+    <table border="1">
+        <tr>
+            <th>MAC Address</th>
+            <th>Last Seen</th>
+        </tr>
+        {% for record in records %}
+        <tr>
+            <td>{{ record.mac_address }}</td>
+            <td>{{ record.last_seen }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2">No attendance records found.</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
