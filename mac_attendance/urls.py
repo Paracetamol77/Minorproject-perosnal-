@@ -1,8 +1,7 @@
 from django.contrib import admin
-from django.urls import path
-from attendance.views import attendance_list
+from django.urls import path, include  # <-- add include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', attendance_list, name='attendance_list'),
+    path('', include('attendance.urls')),  # <-- include your app’s urls
 ]

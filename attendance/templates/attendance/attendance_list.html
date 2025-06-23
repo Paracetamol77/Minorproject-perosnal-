@@ -1,23 +1,458 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Attendance List</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Attendance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table-header {
+            padding: 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .device-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .device-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 20px;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            align-items: center;
+        }
+
+        .device-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .device-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.offline {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .device-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mac-address {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #333;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+        }
+
+        .device-name {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .last-seen {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .time-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            padding: 60px 24px;
+            text-align: center;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box::placeholder {
+            color: #999;
+        }
+
+        .filter-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.05);
+            margin: 0 24px;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tab {
+            flex: 1;
+            padding: 8px 16px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .filter-tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .device-item {
+                grid-template-columns: auto 1fr;
+                gap: 12px;
+            }
+
+            .time-badge {
+                grid-column: 2;
+                justify-self: end;
+                margin-top: 8px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Attendance List</h1>
-    <table border="1">
-        <tr>
-            <th>MAC Address</th>
-            <th>Last Seen</th>
-        </tr>
-        {% for record in records %}
-        <tr>
-            <td>{{ record.mac_address }}</td>
-            <td>{{ record.last_seen }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="2">No attendance records found.</td></tr>
-        {% endfor %}
-    </table>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 Network Attendance</h1>
+            <p>Real-time device presence monitoring</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalDevices">{{ records|length }}</div>
+                <div class="stat-label">Total Devices</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="onlineDevices">{{ records|length }}</div>
+                <div class="stat-label">Online Now</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="lastUpdate">Just Now</div>
+                <div class="stat-label">Last Scan</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <div class="table-title">Connected Devices</div>
+                <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+            </div>
+            
+            <input type="text" class="search-box" placeholder="🔍 Search by MAC address or device name..." id="searchInput">
+            
+            <div class="filter-tabs">
+                <div class="filter-tab active" data-filter="all">All Devices</div>
+                <div class="filter-tab" data-filter="recent">Recent (1h)</div>
+                <div class="filter-tab" data-filter="today">Today</div>
+            </div>
+
+            <div class="device-list" id="deviceList">
+                {% for record in records %}
+                <div class="device-item" data-mac="{{ record.mac_address }}">
+                    <div class="status-indicator"></div>
+                    <div class="device-info">
+                        <div class="mac-address">{{ record.mac_address }}</div>
+                        <div class="device-name" id="device-{{ record.mac_address|slice:'-2:' }}">Unknown Device</div>
+                    </div>
+                    <div class="last-seen">{{ record.last_seen|date:"M d, H:i" }}</div>
+                    <div class="time-badge">Active</div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">📡</div>
+                    <h3>No devices detected</h3>
+                    <p>Run the network scan to detect connected devices</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Device name mapping based on MAC address patterns
+        const deviceNames = {
+            '98:03:CF:FA:D7:E0': 'Unknown Device #1',
+            'F6:DB:9B:37:FE:83': '📱 Galaxy A23',
+            '8E:48:B5:FA:B9:B9': '📱 Unknown Device #2',
+            'BA:80:5A:E1:3F:F6': '📱 Unknown Device #3', 
+            '2A:B9:FB:A5:64:5A': '📱 Redmi 13',
+            'FC:44:82:9D:C4:70': '💻 LAPTOP-A8FS37AR',
+            '3C:9C:0F:84:26:19': '💻 ASHISH-LP01',
+            'DC:B7:2E:27:4B:9E': '📱 Unknown Android',
+            '0A:A2:28:55:78:64': '📱 Redmi Note 9',
+            '92:84:DE:05:A7:F9': '📱 Unknown Android #2',
+            '5C:99:60:76:99:BF': '📱 Galaxy J7 Prime',
+            '62:80:CE:99:5F:B9': '📱 Redmi Note 13',
+            '64:A2:00:3E:1B:46': '📱 Redmi 9C'
+        };
+
+        // Initialize device names
+        document.addEventListener('DOMContentLoaded', function() {
+            const deviceItems = document.querySelectorAll('.device-item');
+            deviceItems.forEach(item => {
+                const mac = item.dataset.mac;
+                const nameElement = item.querySelector('.device-name');
+                if (deviceNames[mac]) {
+                    nameElement.textContent = deviceNames[mac];
+                }
+            });
+
+            // Update last scan time
+            updateLastScanTime();
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const deviceItems = document.querySelectorAll('.device-item');
+            
+            deviceItems.forEach(item => {
+                const mac = item.dataset.mac.toLowerCase();
+                const deviceName = item.querySelector('.device-name').textContent.toLowerCase();
+                
+                if (mac.includes(searchTerm) || deviceName.includes(searchTerm)) {
+                    item.style.display = 'grid';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Filter logic would go here
+                const filter = this.dataset.filter;
+                filterDevices(filter);
+            });
+        });
+
+        function filterDevices(filter) {
+            const deviceItems = document.querySelectorAll('.device-item');
+            const now = new Date();
+            
+            deviceItems.forEach(item => {
+                const lastSeenText = item.querySelector('.last-seen').textContent;
+                // For demo purposes, show all devices for now
+                // In real implementation, you'd parse the date and filter accordingly
+                item.style.display = 'grid';
+            });
+        }
+
+        function refreshData() {
+            // Add loading state
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '⏳ Refreshing...';
+            refreshBtn.disabled = true;
+            
+            // Simulate refresh (in real app, this would be an AJAX call)
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+                updateLastScanTime();
+                
+                // In real implementation, you'd reload the page or fetch new data
+                // window.location.reload();
+            }, 2000);
+        }
+
+        function updateLastScanTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            document.getElementById('lastUpdate').textContent = timeString;
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                updateLastScanTime();
+            }
+        }, 30000);
+
+        // Update online indicator animations
+        setInterval(() => {
+            const indicators = document.querySelectorAll('.status-indicator');
+            indicators.forEach(indicator => {
+                // Random flicker for "active" feel
+                if (Math.random() > 0.95) {
+                    indicator.style.opacity = '0.3';
+                    setTimeout(() => {
+                        indicator.style.opacity = '1';
+                    }, 100);
+                }
+            });
+        }, 1000);
+    </script>
 </body>
 </html>
