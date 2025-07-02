@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<h2>Register</h2>
+<form method="POST" action="{% url 'register' %}">
+    {% csrf_token %}
+    <input name="username" class="form-control" placeholder="Username" required><br>
+    <input name="email" type="email" class="form-control" placeholder="Email" required><br>
+    <input type="password" name="password" class="form-control" placeholder="Password" required><br>
+    <button class="btn btn-primary">Register</button>
+</form>
+<p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+{% if messages %}
+  {% for message in messages %}
+    <p style="color:red;">{{ message }}</p>
+  {% endfor %}
+{% endif %}
+{% endblock %}

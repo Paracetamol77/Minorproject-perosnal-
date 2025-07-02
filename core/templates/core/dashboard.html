@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1e1e3f 50%, #2d2d5f 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(124, 58, 237, 0.6);
+            border-radius: 50%;
+            animation: float-particles 8s linear infinite;
+        }
+
+        @keyframes float-particles {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 10;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .logout-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .logout-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Main Dashboard */
+        .dashboard {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #a855f7, #3b82f6, #06b6d4);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .stat-icon.routines { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+        .stat-icon.attendance { background: linear-gradient(135deg, #059669, #10b981); }
+        .stat-icon.notes { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Content Sections */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            animation: slideInLeft 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-card:nth-child(1) { animation-delay: 0.4s; }
+        .section-card:nth-child(2) { animation-delay: 0.5s; }
+        .section-card:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes slideInLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .section-icon.routines { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+        .section-icon.attendance { background: linear-gradient(135deg, #059669, #10b981); }
+        .section-icon.notes { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* List Items */
+        .item-list {
+            list-style: none;
+        }
+
+        .list-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .list-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+            border-left-color: #a855f7;
+        }
+
+        .list-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.1), transparent);
+            transition: width 0.3s ease;
+        }
+
+        .list-item:hover::before {
+            width: 100%;
+        }
+
+        .item-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .item-title {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-meta {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .dashboard {
+                padding: 1rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Smooth scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(168, 85, 247, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(168, 85, 247, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="welcome-section">
+                <h1>Welcome back, {{ user.username }}!</h1>
+                <p>Here's your academic overview</p>
+            </div>
+            <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon routines">📚</div>
+                <div class="stat-number" id="routinesCount">{{ routines|length }}</div>
+                <div class="stat-label">Total Routines</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon attendance">✅</div>
+                <div class="stat-number" id="attendanceCount">{{ attendances|length }}</div>
+                <div class="stat-label">Attendance Records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon notes">📝</div>
+                <div class="stat-number" id="notesCount">{{ notes|length }}</div>
+                <div class="stat-label">Notes Available</div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Routine Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon routines">📚</div>
+                    <h3 class="section-title">Class Routine</h3>
+                </div>
+                {% if routines %}
+                    <ul class="item-list">
+                        {% for r in routines %}
+                            <li class="list-item">
+                                <div class="item-content">
+                                    <div class="item-title">{{ r.subject }}</div>
+                                    <div class="item-meta">{{ r.day }} at {{ r.time }}</div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📚</div>
+                        <p>No routines available.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Attendance Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon attendance">✅</div>
+                    <h3 class="section-title">Attendance</h3>
+                </div>
+                {% if attendances %}
+                    <ul class="item-list">
+                        {% for a in attendances %}
+                            <li class="list-item">
+                                <div class="item-content">
+                                    <div class="item-title">{{ a.date }}</div>
+                                    <div class="item-meta">Status: {{ a.status }}</div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">✅</div>
+                        <p>No attendance records available.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Notes Section -->
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon notes">📝</div>
+                    <h3 class="section-title">Notes</h3>
+                </div>
+                {% if notes %}
+                    <ul class="item-list">
+                        {% for n in notes %}
+                            <li class="list-item">
+                                <div class="item-content">
+                                    <div class="item-title">{{ n.title }}</div>
+                                    <div class="item-meta">Uploaded: {{ n.uploaded_at }}</div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <p>No notes available.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Create floating particles animation
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+            
+            document.getElementById('bgAnimation').appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 8000);
+        }
+
+        // Generate particles continuously
+        setInterval(createParticle, 300);
+
+        // Animate counters
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 30);
+        }
+
+        // Initialize counter animations when page loads
+        window.addEventListener('load', () => {
+            const routinesCount = document.getElementById('routinesCount');
+            const attendanceCount = document.getElementById('attendanceCount');
+            const notesCount = document.getElementById('notesCount');
+            
+            if (routinesCount) animateCounter(routinesCount, parseInt(routinesCount.textContent));
+            if (attendanceCount) animateCounter(attendanceCount, parseInt(attendanceCount.textContent));
+            if (notesCount) animateCounter(notesCount, parseInt(notesCount.textContent));
+        });
+
+        // Add hover effects to list items
+        document.querySelectorAll('.list-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px) scale(1.02)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+
+        // Add parallax effect to header
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const header = document.querySelector('.header');
+            header.style.transform = `translateY(${scrolled * 0.5}px)`;
+        });
+
+        // Add typing effect to welcome message
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.textContent = '';
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Initialize typing effect (commented out to preserve Django template)
+        // const welcomeText = document.querySelector('.welcome-section h1');
+        // if (welcomeText) {
+        //     const originalText = welcomeText.textContent;
+        //     typeWriter(welcomeText, originalText, 50);
+        // }
+    </script>
+</body>
+</html>
